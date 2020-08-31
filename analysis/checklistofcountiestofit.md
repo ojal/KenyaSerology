@@ -1,0 +1,49 @@
+# Checklist of counties fitted
+
+- [x] Baringo
+- [x] Bomet
+- [x] Bungoma
+- [x] Busia
+- [x] Elgeyo-Marakwet
+- [x] Embu
+- [x] Garissa
+- [x] Homa Bay
+- [x] Isiolo
+- [x] Kajiado
+- [x] Kakamega
+- [x] Kericho
+- [x] Kiambu
+- [x] Kilifi
+- [x] Kirinyaga
+- [x] Kisii
+- [x] Kisumu
+- [x] Kitui
+- [x] Kwale
+- [x] Laikipia
+- [x] Lamu
+- [x] Machakos
+- [x] Makueni
+- [x] Mandera
+- [x] Marsabit
+- [x] Meru
+- [x] Migori
+- [x] Mombasa
+- [x] Murang'a
+- [x] Nairobi
+- [x] Nakuru
+- [x] Nandi
+- [x] Narok
+- [x] Nyamira
+- [x] Nyandarua
+- [x] Nyeri
+- [x] Samburu
+- [x] Siaya
+- [x] Taita Taveta
+- [x] Tana River
+- [x] Tharaka-Nithi
+- [x] Trans Nzoia
+- [x] Turkana
+- [x] Uasin Gishu
+- [x] Vihiga
+- [x] Wajir
+- [x] West Pokot

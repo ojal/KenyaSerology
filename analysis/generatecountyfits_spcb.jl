@@ -2,6 +2,21 @@
 # then put into KenyaSerology module)
 
 push!(LOAD_PATH, joinpath(homedir(),"GitHub/Kenya-Serology/src"))
+# using OrdinaryDiffEq,Distributions,Plots,
+#         Dates,JLD2,Parameters,
+#         TransformVariables, LogDensityProblems,
+#         DynamicHMC, DynamicHMC.Diagnostics,MCMCDiagnostics,
+#         Statistics, Random,Optim
+#
+# using BlackBoxOptim
+# using Plots.PlotMeasures
+# using MCMCChains
+# import AbstractMCMC: AbstractChains
+# using StatsPlots
+# import ForwardDiff
+# using Revise
+# using LinearAlgebra
+# using KenyaSerology
 
 using Distributions,Plots,Dates,JLD2,TransformVariables,Optim,FileIO
 import KenyaSerology
@@ -14,8 +29,9 @@ pyplot()
 
 ## Load data and analysis pipeline
 @load("data/case_data_by_area_21feb_to_6aug.jld2")
-@load("data/serologydata_21feb_6aug.jld2")
+@load("data/cleaned_sero_data_by_area_21feb_to24july.jld2")
 province_sero_data = deepcopy(sero_data)
+@load("data/cleaned_sero_data_by_area_21feb_to21july.jld2")
 @load("data/sero_detection_after_infection_80.jld2")
 @load("data/rel_sero_detection_after_infection.jld2")
 @load("data/rel_sero_detection_after_infection_with_decay.jld2")
@@ -108,22 +124,20 @@ nandi_model_Peff_shortsi,nandi_deaths = pipeline_for_fit("Nandi",8.86e5,data_pri
 wpokot_model_Peff_shortsi,wpokot_deaths = pipeline_for_fit("West Pokot",6.21e5,data_prior_rural)
 @save("modelfits_inferred/wpokot_model_Peff_shortsi.jld2",wpokot_model_Peff_shortsi)
 
-isiolo_model_Peff_shortsi,nakuru_death = pipeline_for_fit("Isiolo",2.68e5,data_prior_semiurban)
-@save("modelfits_inferred/isiolo_model_Peff_shortsi.jld2",isiolo_model_Peff_shortsi)
-muranga_model_Peff_shortsi,muranga_death = pipeline_for_fit("Muranga",1.06e6,data_prior_rural)
-@save("modelfits_inferred/muranga_model_Peff_shortsi.jld2",muranga_model_Peff_shortsi)
-baringo_model_Peff_shortsi,baringo_death = pipeline_for_fit("Baringo",6.67e5,data_prior_rural)
-@save("modelfits_inferred/baringo_model_Peff_shortsi.jld2",baringo_model_Peff_shortsi)
-embu_model_Peff_shortsi,embu_death = pipeline_for_fit("Embu",6.09e5,data_prior_rural)
-@save("modelfits_inferred/embu_model_Peff_shortsi.jld2",embu_model_Peff_shortsi)
-elgeyomarakwet_model_Peff_shortsi,elgeyomarakwet_death = pipeline_for_fit("Elgeyo Marakwet",4.54e5,data_prior_rural)
-@save("modelfits_inferred/elgeyomarakwet_model_Peff_shortsi.jld2",elgeyomarakwet_model_Peff_shortsi)
-laikipia_model_Peff_shortsi,laikipia_death = pipeline_for_fit("Laikipia",5.19e5,data_prior_rural)
-@save("modelfits_inferred/laikipia_model_Peff_shortsi.jld2",laikipia_model_Peff_shortsi)
-meru_model_Peff_shortsi,meru_death = pipeline_for_fit("Meru",1.55e6,data_prior_rural)
-@save("modelfits_inferred/meru_model_Peff_shortsi.jld2",meru_model_Peff_shortsi)
-samburu_model_Peff_shortsi,samburu_death = pipeline_for_fit("Samburu",3.1e5,data_prior_rural)
-@save("modelfits_inferred/samburu_model_Peff_shortsi.jld2",samburu_model_Peff_shortsi)
+
+
+
+
+
+## Quick look at parameter posteriors
+
+nairobi_model_Peff_var_testing.MCMC_results.chain
+kiambu_model_Peff_shortsi_var_testing.MCMC_results.chain
+narok_model_Peff_shortsi.MCMC_results.chain
+kisii_model_Peff_shortsi.MCMC_results.chain
+
+
+
 
 
 ## Saving model fits

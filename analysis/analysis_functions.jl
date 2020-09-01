@@ -193,10 +193,10 @@ function combinedata(combindeddata)
 end
 
 function death_mean_pred(obs_deaths,incidence,IFR_array,p_ID)
-    unscaleddeaths = [KenyaSerology.death_pred(incidence[:,j],1.,p_ID) for j in 1:10000]
+    unscaleddeaths = [KenyaSerology.death_pred(incidence[:,j],1.,p_ID) for j in 1:1000]
     err = 0.
     for (i,true_deaths) in enumerate(obs_deaths)
-        err -= log(mean([pdf(Poisson(IFR*unscaleddeaths[j][i]),true_deaths) for (j,IFR) in enumerate(IFR_array)]))
+        err -= log(mean([pdf(Poisson(IFR*unscaleddeaths[j][i]),true_deaths) for (j,IFR) in enumerate(IFR_array[1:1000])]))
     end
     return err
 end
@@ -218,8 +218,7 @@ function datafortable(areamodel,deaths)
     IFR_hat = mean(mean.(μ_ests))
 
     log_pred_den = death_mean_pred(deaths,inc.true_incidence,mean.(μ_ests),p_ID)
-    k = sum(nai_death)
-    a = 1-0.95
+
     return (lpd = log_pred_den,
             IFR_hat = IFR_hat,
             IFR_CI = (quantile(mean.(μ_ests),0.025), quantile(mean.(μ_ests),0.975) ),
@@ -249,13 +248,68 @@ function getIFRmeanandCI(inc,deaths,IFR_priormean,p_ID)
 			IFRCI = (quantile(IFR_ests,0.025), quantile(IFR_ests,0.975)))
 end
 
+function generate_simulated_death_lpds(model,IFR_priormean,deaths,p_ID)
+    inc = KenyaSerology.incidence_across_samples(model,315)
+    D= sum(deaths[1:165])
+    IFR_array = mean.([Erlang(D+1,1/((1/IFR_priormean) + sum(KenyaSerology.simple_conv(inc.true_incidence[:,n],p_ID)[1:165]))) for n = 1:1000])
+    lpd_array = zeros(1000)
+    rand_deaths = zeros(Int64,165)
+    lpd_actual = death_mean_pred(deaths,inc.true_incidence,IFR_array,p_ID)
+    for k = 1:1000
+        rand_deaths = [rand(Poisson(IFR_array[j]*λ)) for (j,λ) in enumerate(KenyaSerology.simple_conv(inc.true_incidence[:,k],p_ID)[1:165]) ]
+        lpd_array[k] = death_mean_pred(rand_deaths,inc.true_incidence,IFR_array,p_ID)
+    end
+    return lpd_array,lpd_actual
+end
+
 
 function getdataforCSVfile(model,deaths,IFR_priormean,p_ID)
 	paramfits = createmeanandCIforeachparameter(model)
 	inc = KenyaSerology.incidence_across_samples(model,315)
 	peakfits = getpeakmeanandCI(inc)
 	IFRfits = getIFRmeanandCI(inc,deaths,IFR_priormean,p_ID)
+    lpd_array,lpd_actual = generate_simulated_death_lpds(model,IFR_priormean,deaths,p_ID)
+    posterior_predictive_p = sum(lpd_actual .< lpd_array_nai)/1000
 	return (paramfits=paramfits,
 			peakfits=peakfits,
-			IFRfits=IFRfits)
+			IFRfits=IFRfits,
+            posterior_predictive_p=posterior_predictive_p)
+end
+
+function createdatarow(model,deaths,IFR_prior,p_ID)
+	name = model.areaname
+	data = getdataforCSVfile(model,deaths,IFR_prior,p_ID)
+	paramfit_str = [string(round(data.paramfits.posteriormeans[k],sigdigits = 3))*" "*string(round.(data.paramfits.CIs[k],sigdigits = 3)) for k = 1:6]
+	meanpeakdate = Date(2020,2,20) + Day(round(Int64,data.peakfits.peakmean))
+	peakCIdates = (Date(2020,2,20) + Day(round(Int64,data.peakfits.peakCI[1])), Date(2020,2,20) + Day(round(Int64,data.peakfits.peakCI[2]))  )
+	peak_str = string(meanpeakdate)*" "*string(peakCIdates)
+	IFRfit_str = string(round(data.IFRfits.IFRmean*100,sigdigits = 3))*"% ("*string(round(data.IFRfits.IFRCI[1]*100,sigdigits = 3))*"%, "*string(round(data.IFRfits.IFRCI[2]*100,sigdigits = 3))*"%)"
+    posterior_predictive_p = string(data.posterior_predictive_p)
+	return vcat(name,paramfit_str,peak_str,IFRfit_str,posterior_predictive_p)
+end
+
+function parameterinferenceovercollection(dirname,death_data,IFR_prior,p_ID)
+    modelnames = readdir(dirname)
+    df = DataFrame(Countyname = String[],
+					R0 = String[],
+					E0 = String[],
+					I0 = String[],
+					clusteringfactor = String[],
+					p_test = String[],
+					EffPopSize = String[],
+					dateinfectionpeak = String[],
+					IFR = String[],
+                    PosteriorpredicitveP = String[])
+    for name in modelnames
+        modelpath = joinpath(dirname,name)
+        D = FileIO.load(modelpath)
+        f = first(keys(D))
+        model = D[f]
+        println("Gathering data for $(model.areaname)")
+        name_upr = String([uppercase(s) for s in model.areaname])
+        deaths = death_data.deaths[:,death_data.areas .== name_upr]
+		row = createdatarow(model,deaths,0.00264,p_ID)
+        push!(df,row)
+    end
+    return df
 end

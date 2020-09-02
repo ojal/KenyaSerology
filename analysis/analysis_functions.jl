@@ -268,8 +268,13 @@ function getdataforCSVfile(model,deaths,IFR_priormean,p_ID)
 	inc = KenyaSerology.incidence_across_samples(model,315)
 	peakfits = getpeakmeanandCI(inc)
 	IFRfits = getIFRmeanandCI(inc,deaths,IFR_priormean,p_ID)
-    lpd_array,lpd_actual = generate_simulated_death_lpds(model,IFR_priormean,deaths,p_ID)
-    posterior_predictive_p = sum(lpd_actual .< lpd_array_nai)/1000
+    posterior_predictive_p= -1.
+    try
+        lpd_array,lpd_actual = generate_simulated_death_lpds(model,IFR_priormean,deaths,p_ID)
+        posterior_predictive_p = sum(lpd_actual .< lpd_array)/1000
+    catch
+        posterior_predictive_p = -1.
+    end
 	return (paramfits=paramfits,
 			peakfits=peakfits,
 			IFRfits=IFRfits,

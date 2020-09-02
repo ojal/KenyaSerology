@@ -1,4 +1,4 @@
-push!(LOAD_PATH, joinpath(homedir(),"GitHub/Kenya-Serology/src"))
+push!(LOAD_PATH, joinpath(homedir(),"GitHub/KenyaSerology/src"))
 using Distributions,Plots,Dates,JLD2,TransformVariables,Optim,FileIO,DataFrames,CSV,MAT
 import KenyaSerology
 

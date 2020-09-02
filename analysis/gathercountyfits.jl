@@ -44,8 +44,3 @@ df_total = vcat(df,df_sps)
 
 
 CSV.write("analysis/parameterfitsforeachcounty_vs2.csv",df_total)
-
-@load("modelfits_inferred/wpokot_model_Peff_shortsi.jld2")
-deaths_wpokot = vec(death_data.deaths[:,death_data.areas .== "WEST POKOT"])
-
-lpd_array,lpd_actual = generate_simulated_death_lpds(wpokot_model_Peff_shortsi,0.00264,deaths_wpokot,p_ID)

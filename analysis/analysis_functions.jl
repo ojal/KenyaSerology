@@ -196,7 +196,7 @@ function death_mean_pred(obs_deaths,incidence,IFR_array,p_ID)
     unscaleddeaths = [KenyaSerology.death_pred(incidence[:,j],1.,p_ID) for j in 1:1000]
     err = 0.
     for (i,true_deaths) in enumerate(obs_deaths)
-        err -= log(mean([pdf(Poisson(IFR*unscaleddeaths[j][i]),true_deaths) for (j,IFR) in enumerate(IFR_array[1:1000])]))
+        err -= log(mean([pdf(Poisson(max(IFR*unscaleddeaths[j][i],0.)),true_deaths) for (j,IFR) in enumerate(IFR_array[1:1000])]))
     end
     return err
 end
@@ -256,7 +256,7 @@ function generate_simulated_death_lpds(model,IFR_priormean,deaths,p_ID)
     rand_deaths = zeros(Int64,165)
     lpd_actual = death_mean_pred(deaths,inc.true_incidence,IFR_array,p_ID)
     for k = 1:1000
-        rand_deaths = [rand(Poisson(IFR_array[j]*λ)) for (j,λ) in enumerate(KenyaSerology.simple_conv(inc.true_incidence[:,k],p_ID)[1:165]) ]
+        rand_deaths = [rand(Poisson(max(IFR_array[j]*λ,0.))) for (j,λ) in enumerate(KenyaSerology.simple_conv(inc.true_incidence[:,k],p_ID)[1:165]) ]
         lpd_array[k] = death_mean_pred(rand_deaths,inc.true_incidence,IFR_array,p_ID)
     end
     return lpd_array,lpd_actual

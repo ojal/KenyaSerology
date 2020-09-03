@@ -10,6 +10,10 @@ This repository contains the openly available data and code in order to reproduc
 
 ## Data sets in this repository
 
+`/opendatacsvs`folder contains .csv datafiles (see *supplementary information* for the main manuscript to read data file captions). This data is also present on the repository in the form of .jld2 datafiles.
 
+## Tutorial notebooks
+
+To aid reproducability and reusability of this model we are currently writing a series of notebooks that either elucidate our methodology, or directly reproduce results in the paper. **In progress**
 
 

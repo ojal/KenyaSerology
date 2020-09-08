@@ -33,9 +33,9 @@ function make_odeproblemforinference(;startdate = startdate::Date,changedate = c
 end
 
 """
-make_odeproblemforinfence(;startdate = startdate::Date,changedate = changedate::Date,enddate = enddate::Date)
+make_odeproblemforinference(contactrate_data;startdate = startdate::Date,enddate = enddate::Date)
 
-The default constructor for an ODE Problem to be used in the inference method - two R values
+The default constructor for an ODE Problem to be used in the inference method with daily changing contact rates
 """
 function make_odeproblemforinference(contactrate_data;startdate = startdate::Date,enddate = enddate::Date)
     contactrate = vec(contactrate_data.contactrate)

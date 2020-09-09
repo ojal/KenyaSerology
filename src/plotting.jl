@@ -187,48 +187,7 @@ function incidence_across_samples(areamodel::CoVAreaModel,l)
             eff_transmission=eff_transmission)
 end
 
-# function incidence_across_samples(areamodel::CoVAreaModel,l,::Val{:OR})
-#         n = size(areamodel.MCMC_results.chain,1)
-#         PCR_incidence_samples = zeros(Int64(l),n)
-#         sero_converted_samples = zeros(Int64(l),n)
-#         true_infecteds = zeros(Int64(l),n)
-#         true_incidence = zeros(Int64(l),n)
-#         true_susceptible = zeros(Int64(l),n)
-#         true_infectious = zeros(Int64(l),n)
-#
-#         for i = 1:n
-#                 R = areamodel.MCMC_results.chain[i,1,1]
-#                 E₀ = areamodel.MCMC_results.chain[i,2,1]
-#                 I₀ = areamodel.MCMC_results.chain[i,3,1]
-#                 α = areamodel.MCMC_results.chain[i,4,1]
-#                 p_test = areamodel.MCMC_results.chain[i,5,1]
-#                 χ = areamodel.MCMC_results.chain[i,6,1]
-#
-#
-#                 p = [R,areamodel.σ,areamodel.γ,areamodel.N]
-#                 x₀ = [areamodel.N - E₀ - I₀,E₀,I₀,0.,0.]
-#                 sol = solve(areamodel.prob,BS3();u0 = x₀,p = p,saveat=1,tspan = (0.,l) )
-#
-#                 incidence = get_incidence(sol)
-#                 PCR_incidence = simple_conv(incidence,areamodel.PCR_array)*p_test
-#                 N_sero = simple_conv(incidence,areamodel.sero_array)
-#                 p_sero =  areamodel.PCR_sensitivity*(χ*N_sero)./(areamodel.N + (χ-1)*N_sero)
-#                 PCR_incidence_samples[:,i] = PCR_incidence
-#                 sero_converted_samples[:,i] = p_sero .+ (1 .- p_sero).*(1-areamodel.sero_specificity)
-#                 true_incidence[:,i] = incidence
-#                 for t = 1:Int64(l)
-#                     true_infecteds[t,i] = sum(sol.u[t][2:4])
-#                     true_susceptible[t,i] = sol.u[t][1]
-#                     true_infectious[t,i] = sol.u[t][3]
-#                 end
-#         end
-#         return (PCR_incidence_samples=PCR_incidence_samples,
-#             sero_converted_samples=sero_converted_samples,
-#             true_infecteds=true_infecteds,
-#             true_incidence=true_incidence,
-#             true_susceptible =true_susceptible,
-#             true_infectious=true_infectious)
-# end
+
 
 """
 function draw_neg_bin(μ,α)

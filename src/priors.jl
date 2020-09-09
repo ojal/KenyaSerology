@@ -52,3 +52,11 @@ function basic_prior_contactrate_PCR_Peff_rural(θ)
                 logpdf(Gamma(1,1e-4),p_test) +
                 logpdf(Gamma(3,0.5/3),α)
 end
+function basic_prior_nairobi(θ)
+        E₀,I₀,R,α,p_test,P_eff = θ
+        return logpdf(Gamma(1,100/1),E₀ + I₀) +
+                logpdf(Beta(2,1),P_eff) +
+                logpdf(Gamma(2,2.5/2),R) +
+                logpdf(Gamma(10,3000/4.3e7),p_test) +
+                logpdf(Gamma(3,0.5/3),α)
+end

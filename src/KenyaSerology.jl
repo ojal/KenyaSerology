@@ -33,7 +33,7 @@ include("plotting.jl")
 
 
 #Load defaults for the PCR and serological sensitivity after infection
-@load("data/default_sero_detection_after_infection.jld2")
+@load("data/rel_sero_detection_after_infection.jld2")
 @load("data/default_PCR_detection_after_infection.jld2")
 
 end # module

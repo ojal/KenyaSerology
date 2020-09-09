@@ -42,7 +42,7 @@ function generate_model_for_fit(areaname,popsize,logprior)
                                         N = popsize,
                                         γ = 1/(5.5 - 3.1),
                                         contactrate_data = projected_contactrate_kenya,
-                                        prob = KenyaSerology.make_odeproblemforinference(projected_contactrate_mombasa,
+                                        prob = KenyaSerology.make_odeproblemforinference(projected_contactrate_kenya,
                                                                                                 startdate = Date(2020,2,21),
                                                                                                 enddate = Date(2020,8,6)),
                                         sero_array = rel_sero_array_26days,

@@ -15,7 +15,7 @@ function generate_model_for_fit(areaname,popsize,logprior,::Val{:var_testing})
                                         γ = 1/(5.5 - 3.1),
                                         contactrate_data = projected_contactrate_kenya,
                                         relative_testing_rate = relative_testing_rate_nairobi.relative_testing_rate, #This is where relative testing rate based on relative to mean testing in Kenya goes in
-                                        prob = KenyaSerology.make_odeproblemforinference(projected_contactrate_mombasa,
+                                        prob = KenyaSerology.make_odeproblemforinference(projected_contactrate_nairobi,
                                                                                                 startdate = Date(2020,2,21),
                                                                                                 enddate = Date(2020,8,6)),
                                         sero_array = rel_sero_array_26days,

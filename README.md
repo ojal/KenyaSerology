@@ -14,6 +14,6 @@ This repository contains the openly available data and code in order to reproduc
 
 ## Tutorial notebooks
 
-To aid reproducability and reusability of this model we are currently writing a series of notebooks that either elucidate our methodology, or directly reproduce results in the paper. **In progress**
+To aid reproducability and reusability of this model we are currently writing a series of notebooks that either elucidate our methodology, or directly reproduce results in the paper. Currently, these cover the basic ideas behind the model (how the contact rates are generated, the underlying transmission model etc) and the methods used to draw inferences from the data and make predictions (as well as visualising these predictions). A notebook on how to best interrogate the underlying MCMC chains, visualise their joint distributions and model fit diagnostics is **work in progress**.
 
 

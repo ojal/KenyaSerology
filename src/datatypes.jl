@@ -21,14 +21,14 @@ Struct for holding the fixed data of the area and MCMC results
     dates::Vector{Date}#Dates of each day
     N::Float64#Area's population size
     σ::Float64 = 1/3.1 # 1/mean latent period
-    γ::Float64#Recovery rate
+    γ::Float64 = 1/2.4#Recovery rate
     contactrate_data
     relative_testing_rate::Vector{Float64} = ones(500)
     prob::ODEProblem
     PCR_array::Vector{Float64} = PCR_array #Relative Sensitivity of PCR test on days post-infection
     PCR_sensitivity::Float64 = 1. #Base sensitivity for RT-PCR test
     PCR_specificity::Float64 = 0.995 #Base specificity for RT_PCR test
-    sero_array::Vector{Float64} = sero_array #Relative sensitivity of serology test on days post-infection
+    sero_array::Vector{Float64} = rel_sero_array_26days #Relative sensitivity of serology test on days post-infection
     sero_sensitivity::Float64 = 0.825 #Base sensitivity for serology test
     sero_specificity::Float64 = 0.992 #Base specificity for serology test
     M_BB::Float64 = 40.74 #Shrinkage factor for BetaBinomial distribution that incorporates the uncertainty in the sensitivity (fitted to serology group)

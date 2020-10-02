@@ -1,7 +1,7 @@
 name = "KenyaSerology"
 uuid = "8af3f325-98b9-4f28-b139-0b1650003e02"
-authors = ["Samuel Brand <S.Brand@warwick.ac.uk>", "John Ojal "]
-version = "1.0.0"
+authors = ["Samuel Brand <S.Brand@warwick.ac.uk>", "John Ojal <John.Ojal@lshtm.ac.uk>"]
+version = "1.2.0"
 
 [deps]
 AbstractMCMC = "80f14c24-f653-4e6a-9b94-39d6b0f70001"

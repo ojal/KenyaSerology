@@ -6,7 +6,7 @@ This repository contains the openly available data and code in order to reproduc
 * Access and basic familiarity with the [Julia programming language](https://julialang.org/). The code base in this repository was run using Julia 1.3.1, and has not been tested for other Julia releases as of 03/09/2020.
 * The underlying dynamical system representing the unobserved infection process is a modification to the basic SEIR model that is described in [this paper](https://journals.sagepub.com/doi/full/10.1177/0962280217747054), albeit we implement a continuous time rather than discrete version of the model.
 * Solutions of the infection process are generated using the performant, and well documented, package [SciML/DifferentialEquations.jl](https://github.com/SciML/DifferentialEquations.jl). Familiarisation with this package is desirable.
-* Hamiltonian MCMC (HMC) is implemented using the [dynamicHMC.jl](https://github.com/tpapp/DynamicHMC.jl) package. The log-likelihood function for parameters is directly defined in the package, and gradients are calculated using forward-mode automatic differentiation. The combination of ODE solutions and log-likelihood function gradients in code was inspired by [DiffEqBayes.jl](https://github.com/SciML/DiffEqBayes.jl). A good conceptual introduction to HMC can be found [here](https://arxiv.org/abs/1701.02434).
+* Hamiltonian MCMC (HMC) is implemented using the [dynamicHMC.jl](https://github.com/tpapp/DynamicHMC.jl) package. The log-likelihood function for parameters is directly defined in KenyaSerology, and log-likelihood gradients (necessary for HMC) are calculated using forward-mode automatic differentiation. The combination of ODE solutions and log-likelihood function gradients in code was inspired by [DiffEqBayes.jl](https://github.com/SciML/DiffEqBayes.jl). A good conceptual introduction to HMC can be found [here](https://arxiv.org/abs/1701.02434).
 
 ## Data sets in this repository
 
@@ -14,6 +14,6 @@ This repository contains the openly available data and code in order to reproduc
 
 ## Tutorial notebooks
 
-To aid reproducability and reusability of this model we are currently writing a series of notebooks that either elucidate our methodology, or directly reproduce results in the paper. Currently, these cover the basic ideas behind the model (how the contact rates are generated, the underlying transmission model etc) and the methods used to draw inferences from the data and make predictions (as well as visualising these predictions). A notebook on how to best interrogate the underlying MCMC chains, visualise their joint distributions and model fit diagnostics is **work in progress**.
+To aid reproducability and reusability of this model we are currently writing a series of notebooks that either elucidate our methodology, or directly reproduce results in the paper. These cover the basic ideas behind the model (how the contact rates are generated, the underlying transmission model etc) and the methods used to draw inferences from the data (the interaction between time-since-infection and detectability by different tests) and make predictions (as well as visualising these predictions).
 
 

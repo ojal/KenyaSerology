@@ -10,7 +10,7 @@ struct MCMCResults
 end
 
 """
-mutable struct CoVAreaModel
+    mutable struct CoVAreaModel
 
 Struct for holding the fixed data of the area and MCMC results
 """
@@ -38,7 +38,7 @@ Struct for holding the fixed data of the area and MCMC results
 end
 
 """
-mutable struct CoVAreaForecastModel
+    mutable struct CoVAreaForecastModel
 
 Struct for holding the fixed data of the area, MCMC results and distributions important for forecasting
 """

@@ -97,4 +97,18 @@ df_PCRpos = createPCRpositivedataframe(case_data)
 df_deaths = createdeathsdataframe(death_data)
 CSV.write("data/serologicaldata_21feb_6thaug.csv",df_sero)
 CSV.write("data/PCRpostiveswabs_21feb_6aug.csv",df_PCRpos)
-CSV.write("data/deaths_21feb_6aug.csv",df_deaths)
+CSV.write("deaths_21feb_30thsept.csv",df_deaths)
+
+
+function createPCRpositive_and_negativedataframe(case_data)
+    df_PCRpos = DataFrame(sampledates = string.(case_data.dates))
+    for (i,county) in enumerate(case_data.areas)
+        str_pos = Symbol(county*"_posswabtest")
+        df_PCRpos[!,str_pos] = max.(case_data.cases[:,i,1],0)
+        str_neg = Symbol(county*"_negswabtest")
+        df_PCRpos[!,str_neg] = case_data.cases[:,i,2]
+    end
+    return df_PCRpos
+end
+df_PCRposandneg = createPCRpositive_and_negativedataframe(case_data_with_pos_neg)
+CSV.write("PCRpostiveandnegswabs_21feb_30thsept.csv",df_PCRposandneg)

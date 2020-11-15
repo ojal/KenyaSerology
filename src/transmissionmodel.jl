@@ -64,6 +64,61 @@ function make_odeproblemforinference(contactrate_data;startdate = startdate::Dat
 end
 
 """
+    make_odeproblemforinference_parameter_ct(projected_contactrate;startdate::Date,enddate::Date)
+
+Construct an ODE Problem to simulate the county level epidemic, where the effective contact rates are parameters rather than data
+"""
+function make_odeproblemforinference_parameter_ct(projected_contactrate;startdate::Date,enddate::Date)
+    dates = projected_contactrate.date
+    t_end = (enddate - startdate).value
+    function getcontactrate(t,p)
+        contactrate = @view p[5:end]
+        return contactrate[max(min(ceil(Int64,t),length(contactrate)),1)]
+    end
+    function f(du,u,p,t)
+        S,E,I,R,cum_inf = u #Get current state of model
+        R,σ,γ,N = @view p[1:4] #Get parameters from parameter vector
+        ι = R*getcontactrate(t,p)*γ*S*I/N #Incidence rate
+        du[1] = -ι #Loss of susceptibles
+        du[2] = ι - σ*E #Flux of exposed
+        du[3] = σ*E - γ*I #Flux of infecteds
+        du[4] = γ*I #Gain of recovered/immunes
+        du[5] = ι #Rate of new infections
+    end
+    ff = ODEFunction(f,syms = [:S,:E,:I,:R,:C]) #This just augments the vector field function with names for each variable
+    #Placeholder parameters and initial conditions
+    p = [3.,1/3.1,1/9.,4.3e6]
+    x₀ = [4.3e6,100,100,0,0]
+    #Define the ODEProblem for the SEIR model
+    prob = ODEProblem(ff,x₀,(0.,t_end),p)
+    return prob
+end
+
+function make_odeproblemforinference_simple(contactrate;startdate = startdate::Date,enddate = enddate::Date)
+    t_end = (enddate - startdate).value
+    function getcontactrate(t)
+        return contactrate[max(min(ceil(Int64,t),length(contactrate)),1)]
+    end
+    function f(du,u,p,t)
+        S,E,I,R,cum_inf = u #Get current state of model
+        R,σ,γ,N = p #Get parameters from parameter vector
+        ι = R*getcontactrate(t)*γ*S*I/N #Incidence rate
+        du[1] = -ι #Loss of susceptibles
+        du[2] = ι - σ*E #Flux of exposed
+        du[3] = σ*E - γ*I #Flux of infecteds
+        du[4] = γ*I #Gain of recovered/immunes
+        du[5] = ι #Rate of new infections
+    end
+    ff = ODEFunction(f,syms = [:S,:E,:I,:R,:C]) #This just augments the vector field function with names for each variable
+    #Placeholder parameters and initial conditions
+    p = [3.,1/3.1,1/9.,4.3e6]
+    x₀ = [4.3e6,100,100,0,0]
+    #Define the ODEProblem for the SEIR model
+    prob = ODEProblem(ff,x₀,(0.,t_end),p)
+    return prob
+end
+
+"""
 function simple_conv(incidence,kern)
 
 Direct implementation of convolution [incidence ⋆ kern](t)

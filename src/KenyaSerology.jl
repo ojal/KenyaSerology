@@ -6,7 +6,7 @@ using OrdinaryDiffEq,Distributions,Plots,
         Dates,JLD2,Parameters,
         TransformVariables, LogDensityProblems,
         DynamicHMC, DynamicHMC.Diagnostics,MCMCDiagnostics,
-        Statistics, Random, MCMCChains,Optim,BlackBoxOptim
+        Statistics, Random, MCMCChains,Optim,BlackBoxOptim,FileIO,DataFrames
 using Plots.PlotMeasures
 using LinearAlgebra
 
@@ -29,11 +29,15 @@ include("priors.jl")
 include("loglikelihoods.jl")
 include("observationmodel.jl")
 include("plotting.jl")
+include("analysis.jl")
+include("outcomes.jl")
+include("EM.jl")
 
 
 
 #Load defaults for the PCR and serological sensitivity after infection
 @load("data/rel_sero_detection_after_infection.jld2")
-@load("data/default_PCR_detection_after_infection.jld2")
+# @load("data/default_PCR_detection_after_infection.jld2")
+@load("data/smoothedPCR_detection_after_infection.jld2")
 
 end # module

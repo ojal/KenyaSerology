@@ -30,20 +30,20 @@
 - [x] Mombasa
 - [x] Murang'a
 - [x] Nairobi
-- [x] Nakuru
-- [x] Nandi
-- [x] Narok
-- [x] Nyamira
-- [x] Nyandarua
-- [x] Nyeri
-- [x] Samburu
-- [x] Siaya
-- [x] Taita Taveta
-- [x] Tana River
-- [x] Tharaka-Nithi
-- [x] Trans Nzoia
-- [x] Turkana
-- [x] Uasin Gishu
-- [x] Vihiga
-- [x] Wajir
-- [x] West Pokot
+- [ ] Nakuru <----
+- [ ] Nandi
+- [ ] Narok
+- [ ] Nyamira
+- [ ] Nyandarua
+- [ ] Nyeri
+- [ ] Samburu
+- [ ] Siaya
+- [ ] Taita Taveta
+- [ ] Tana River
+- [ ] Tharaka-Nithi
+- [ ] Trans Nzoia
+- [ ] Turkana
+- [ ] Uasin Gishu
+- [ ] Vihiga
+- [ ] Wajir
+- [ ] West Pokot

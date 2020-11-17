@@ -1,0 +1,140 @@
+
+# Notebook 5: Inferring underlying parameters from data
+
+In notebook 4 we investigated the connection between the underlying transmission process model and observable events.
+However, we used posterior mean estimates for the unknown parameters of the model. In this notebook, we look at how the posterior distributions for the parameters were generated. In this notebook we cover:
+
+* Relative detection rate.
+* The `CoVAreaModel` struct, this is the object that we use to contain available data for the county, and the log-likelihood model.
+* Defining the parameters of the model using the `TransformVariables` package.
+* Finding a good initialisation of the inference method.
+* Running the inference method (Hamiltonian MCMC), and adding the results to the `CoVAreaModel` struct.
+
+First, we load the data we need for the inference problem.
+
+
+```julia
+cd(joinpath(homedir(),"GitHub/KenyaSerology/")) #Sets the working directory to the /KenyaSerology directory
+push!(LOAD_PATH, joinpath(homedir(),"GitHub/KenyaSerology/src")) #Adds the source code directory for KenyaSerology to the LOAD_PATH global variable
+
+using JLD2,Plots,Dates
+using Distributions,TransformVariables,Parameters #These packages define some useful methods
+
+import KenyaSerology
+
+#Load data
+@load("data/projected_contact_data_09102020.jld2");
+@load("data/case_data_with_pos_neg_21feb_to_30sept.jld2");
+@load("data/serologydata_21feb_30sept.jld2");
+@load("data/relative_testing_rate.jld2");
+```
+
+Each data file should be familiar from previous notebooks except `relative_testing_rate.jld2`. This file contains a linear fit to testing rate relative to the mean tests per day (2,482 tests per day which occured around 1st June).
+After 7th July we have negative PCR testing data available for every county, so the testing rate scale is only used before 7th July in counties without negative testing data. Samples from before 12th April are ignored in all counties (testing was extremely patchy before mid-April).
+
+
+```julia
+plot(relative_testing_rate_nairobi.date[relative_testing_rate_nairobi.date .<= Date(2020,8,6)],
+    relative_testing_rate_nairobi.relative_testing_rate[relative_testing_rate_nairobi.date .<= Date(2020,8,6)],
+    ylabel = "Relative testing rate",lab ="")
+```
+
+To run inference on a county we bundle all the necessary data, in addition to a choice of log-likelihood function and a choice of prior distributions into a `CoVAreaModel` type struct (defined in the `KenyaSerology` package).
+We use Nairobi as an example, and as in previous notebooks collect the relevant data and define an ODE problem for Nairobi.
+
+
+```julia
+#Define the transmission model (see notebook 4) --- We infer up to 6th August so no point solving past that point for inference
+transmission_prob = KenyaSerology.make_odeproblemforinference(projected_contactrate_nairobi,#Method for defining the ODE problem underlying the inference
+                                                                                        startdate = Date(2020,2,21),#Don't change from Feb 21st as start date!
+                                                                                        enddate = Date(2020,8,6)) #Solve until the end of the inference period
+
+#Convert the cases for Nairobi into a vector, each entry is number of PCR-pos swabs collected that day
+#This is a 168-length vector (each day 21st Feb to 6th Aug)
+cases = Matrix(case_data_with_pos_neg.cases[:,case_data_with_pos_neg.areas .== "NAIROBI",:][:,1,:]);
+#Convert the serology data into a matrix 168x2 for each day and positive/negative tests
+sero = Matrix(sero_data.serodata[:,sero_data.areas .== "nairobi",:][:,1,:]);
+```
+
+To define the inference problem we need a log-likelihood function and log-prior function.
+Both of these functions which implement the priors and likelihood model described in the main paper are available from the `KenyaSerology` package.
+A key thing to note is that before we have negative swab test data (before 7th July in Nairobi) the log-likelihood for observed positive swab tests is Negative-Binomial, whereas when we have
+negative tests we use a Beta-Binomial log-likelihood.
+
+
+```julia
+log_priors = KenyaSerology.nairobi_denominator_prior
+log_likelihood = KenyaSerology.loglikelihood_with_negPCR
+```
+
+The `log_priors` function accepts a `NamedTuple` of parameter arguments and returns the log-density for prior at that point.
+To demonstrate we plot the log-prior density along a slice of fixed parameters, varying only R, which reflects our underlying belief that prior to data $R_0 \sim \Gamma(2,2.5/2)$,
+that is prior mean 2.5 but skewed towards lower values.
+
+
+```julia
+log_prior_density_R₀ = [log_priors((E₀=40,I₀=40.,R = R₀,α=0.48,p_test=3.4e-4,M_PCR = 71.,χ = 2.8,P_eff = 0.77) ) for R₀ in 0.5:0.01:3 ]
+plot(0.5:0.01:3,log_prior_density_R₀,ylabel = "Prior log-density",xlabel = "R",lab="")
+```
+
+The log-likelihood function has two arguments: a `NamedTuple` that reads in the parameters and `CoVAreaModel` struct which reads in the data. The `CoVAreaModel` type struct is defined in the `KenyaSerology` package. We construct one for Nairobi below.
+
+
+```julia
+#Construct the inference model using keyword arguments
+nairobi_inference_model = KenyaSerology.CoVAreaModel(areaname = "Nairobi",
+                                        PCR_cases = cases,#See above
+                                        sero_cases = sero,#See above
+                                        dates = case_data_with_pos_neg.dates,
+                                        N = 4.3e6,
+                                        relative_testing_rate = relative_testing_rate_nairobi.relative_testing_rate,
+                                        contactrate_data = projected_contactrate_nairobi,
+                                        prob = transmission_prob, #See above
+                                        log_priors = log_priors,#See above
+                                        log_likelihood = log_likelihood)
+```
+
+You should note that there are more fields in the `nairobi_inference_model` than used in constuction.
+This is because `KenyaSerology` has default values for a number of fields which were defined in the main paper (e.g. the default relative detection rate by serology is as shown in notebook 4 etc).
+
+The log-likelihood + log-prior value for a choice of parameters given the data is a *callable* function of the `CoVAreaModel`. This means that we can use the `nairobi_inference_model` struct as a function. This automatically take the data, choice of prior, and choice of log-likelihood function into account. Below we plot the posterior density along a slice. This shows hows much the data moves our estimates away from the weak prior used.
+
+
+```julia
+log_posterior_density_R₀ = [nairobi_inference_model((E₀=40,I₀=40.,R = R₀,α=0.48,p_test=3.4e-4,M_PCR = 71.,χ = 2.8,P_eff = 0.77) ) for R₀ in 0.5:0.01:3 ]
+plot(0.5:0.01:3,log_posterior_density_R₀,ylabel = "log-density",xlabel = "R",
+    xlims = (1.,3),
+    ylims = (-1000,0),
+    lab = "Posterior",
+    lw = 2)
+plot!(0.5:0.01:3,log_prior_density_R₀,lw = 2,lab = "Prior")
+
+```
+Because we are interested in jointly inferring a number of parameters from the data, we need a more sophisticated method than slicing the likelihood along a line.
+We used Hamiltonian MCMC, implemented by the [dynamicHMC.jl](https://github.com/tpapp/DynamicHMC.jl) package. First, we need to define the parameters as a `TransformTuple` object, using the `TransformVariables` package.
+
+
+```julia
+trans = as((R = asℝ₊,E₀ = asℝ₊,I₀ = asℝ₊,χ = asℝ₊,M_PCR = asℝ₊,α = asℝ₊,p_test = as𝕀,P_eff = as𝕀))
+```
+
+The `trans` object encodes: 1) the parameters we are going to ask the inference method to draw from their joint posterior distribution, and, 2) a transformation on each parameter that guarantees that parameters are only investigated on their natural range.
+
+Now we are ready to run the inference (this takes a few minutes to make 10,000 draws from the posterior distribution).
+There are unstable regions of parameter space (e.g. very large $R_0$). The default initial optimizer for `DynamicHMC` (Newton-method) does not perform well from randomly initialised parameters.
+The `inferparameters!` function first runs a global optimizer, the default differential evolultion optimizer from `BlackBoxOptim` package, on the transformed parameters before passing the best fitting parameter set to
+`DynamicHMC` package to perform HMC.
+
+
+```julia
+KenyaSerology.inferparameters!(nairobi_inference_model, #The CoVAreaModel that defines the inference problem
+                                10000,#Number of draws from the posterior distribution
+                                trans)#An initial guess of where to start HMC --- ordered the same at the trans object
+```
+The `inferparameters!` function replaces the `MCMCResults` object for `nairobi_inference_model` with information about the posterior draws,
+the log-likelihood, and HMC tree statistics.
+
+```julia
+#Access a prettyprint of the posterior draws
+nairobi_inference_model.MCMC_results.chain
+```

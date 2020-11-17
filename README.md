@@ -16,4 +16,4 @@ This repository contains the openly available data and code in order to reproduc
 
 To aid reproducability and reusability of this model we are currently writing a series of notebooks that either elucidate our methodology, or directly reproduce results in the paper. These cover the basic ideas behind the model (how the contact rates are generated, the underlying transmission model etc) and the methods used to draw inferences from the data (the interaction between time-since-infection and detectability by different tests) and make predictions (as well as visualising these predictions).
 
-
+The notebooks are given as `.jmd` files, and require [Weave.jl](https://github.com/JunoLab/Weave.jl) to create html output files. Usage of julia markdown with Weave is very similar to the popular R markdown `.rmd` with `knitr`.   

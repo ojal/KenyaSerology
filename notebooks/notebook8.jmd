@@ -1,0 +1,52 @@
+
+# Notebook 8: Fitting effective contact rate
+
+So far we have assumed that the contact rate, $C(t)$ such that $R(t) = R_0 C(t)$, follows the Google trends we found in notebook 1.
+In this notebook, we use these as prior data, but converge $C(t)$ to its posterior mode using the EM algorithm (see Gelman *et al* 2013, *Bayesian Data analysis*).
+This effectively treats each day's C(t) value as a new parameter, and we solve the EM algorithm M(aximisation)-step using optimiser methods over the C(t) value on each day.
+
+
+```julia
+cd(joinpath(homedir(),"GitHub/KenyaSerology/")) #Sets the working directory to the /KenyaSerology directory
+push!(LOAD_PATH, joinpath(homedir(),"GitHub/KenyaSerology/src")) #Adds the source code directory for KenyaSerology to the LOAD_PATH global variable
+
+using JLD2,StatsPlots,Dates,DataFrames
+using Distributions,TransformVariables,Parameters #These packages define some useful methods
+using DynamicHMC.Diagnostics,MCMCChains,MCMCDiagnostics#Useful diagnostic tooling
+
+import KenyaSerology
+
+@load("modelfits_pos_neg_googleCt/Nairobi_model.jld2")#This is fitted model for Nairobi we used in the paper
+nairobi_inference_model = model; #For consistency in naming with notebook 5
+@load("data/projected_contact_data_09102020.jld2")
+```
+
+The EM algorithm is a partially Bayesian method. One divides the parameters into two groups: latent parameters who enter the algorithm via a conditional (posterior) distribution
+and 2) parameters to be maximised. Typically, this was used to find MLE estimators for parameters where the latent parameters were considered to be nuisance (e.g. mixture distribution fitting).
+However, we use it as a convenient method when joint estimation is computationally expensive.
+
+
+```julia
+fitted_ct = KenyaSerology.optimise_ct_model(nairobi_inference_model,projected_contactrate_nairobi)
+
+plt_Ct = plot(nairobi_inference_model.dates[1:length(fitted_ct)],fitted_ct,
+      ylabel = "Contact rate",
+      lab = "fitted C(t): iteration 1")
+plot!(plt_Ct,nairobi_inference_model.contactrate_data.date, nairobi_inference_model.contactrate_data.contactrate,
+      lab = "Google mobility data",
+      legend = :bottomright)
+```
+
+We see that the fitted C(t) value follows a similar trend to the google data, but has oscillations around the google prediction.
+
+This was just one iteration of the EM algorithm. We can load a saved model fit for Nairobi where EM algorithm ran to convergence.
+
+```julia
+@load("modelfits_pos_neg_fittedCt/Nairobi_model_opt.jld2")
+nairobi_inference_model_fittedCt = model_opt
+plot!(plt_Ct,nairobi_inference_model_fittedCt.contactrate_data.date, nairobi_inference_model_fittedCt.contactrate_data.contactrate,
+      lab = "Fitted C(t): converged",
+      legend = :bottomright)
+```
+
+Even after one round of EM algorithm the method is already close to its eventual converged limit.

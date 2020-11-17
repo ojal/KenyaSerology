@@ -1,0 +1,56 @@
+
+# Notebook 7: Investigating the MCMC chains of fitted models
+
+In notebook 6 we covered using an ensemble of parameter draws from their posterior distribution, aka the MCMC chain, to make forecasts. In this notebook, we briefly look at visualising the chains themselves and look at some simple chain diagnostics.
+
+The `KenyaSerology.inferparameters!` function adds a MCMC chain object to the `CoVAreaModel` object containing all the data for the Kenyan county. Rather than reinvent the wheel, the MCMC chain is represented as a `Chains` object, which is part of the [Turing.jl](https://github.com/TuringLang/Turing.jl) ecosystem. Therefore, any tutorial for Turing on visualing and diagnostics of MCMC convergence applies to us too. Below is a flavour.
+
+As before, we first access a model fit we did earlier.
+
+
+```julia
+cd(joinpath(homedir(),"GitHub/KenyaSerology/")) #Sets the working directory to the /KenyaSerology directory
+push!(LOAD_PATH, joinpath(homedir(),"GitHub/KenyaSerology/src")) #Adds the source code directory for KenyaSerology to the LOAD_PATH global variable
+
+using JLD2,StatsPlots,Dates,DataFrames
+using Distributions,TransformVariables,Parameters #These packages define some useful methods
+using DynamicHMC.Diagnostics,MCMCChains,MCMCDiagnostics#Useful diagnostic tooling
+
+import KenyaSerology
+
+@load("modelfits_pos_neg_googleCt/Nairobi_model.jld2")#This is fitted model for Nairobi we used in the paper
+nairobi_inference_model = model; #For consistency in naming with notebook 5
+
+```
+
+Now we can access the `Chains` object that represents the draws from the MCMC inference process saved with the data for the Kenyan county (in this case Nairobi). Just calling the object gives summary statistics of the posterior distributions of the parameters.
+
+
+```julia
+chn = nairobi_inference_model.MCMC_results.chain
+```
+
+We can use the methods that come with `MCMCChains` and `DynamicHMC.Diagnostics` to have a closer inspection of the chain. Visually, we can look at the sample values and marginal posteriors.
+
+
+```julia
+plot(chn; colordim = :chain,dpi = 75)
+```
+Or a cornerplot for visualing the correlation structure of the posterior distribution.
+
+```julia
+plt = corner(chn);
+plot!(plt,size = (700,650),dpi = 75)
+```
+
+It is worth taking a moment to think about what the corner plot for the Nairobi fit is telling us. There are three parameter pairs where we observe fairly strong negative correlation between draws:
+* Between $E_0$ and $I_0$. It is difficult for the model to identify the proportion of infected people on 21st Feb who were actively infectious.
+* Between $\chi$/$p_{test}$ and $P_{eff}$. Higher biasing of finding PCR positive individuals (with neg. swab test data) or higher detection rate (without neg. swab test data) is negatively correlated with the effective population size.
+This tells us that from the data we have for Nairobi its hard to distinguish between higher detection success and the level of heterogeneity in who is responsible for most transmission.
+
+Convergence diagnostics are available for both the chain (R hat for each parameter is shown as part of the chain summary) and the tree statistics of the HMC+NUTS routine:
+
+
+```julia
+summarize_tree_statistics(nairobi_inference_model.MCMC_results.treestatistics)
+```

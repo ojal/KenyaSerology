@@ -1,0 +1,98 @@
+
+# Notebook 6: Using MCMC chains for prediction and plotting
+
+In notebook 5 we demonstrated the Hamiltonian MCMC method used to draw from the joint posterior distribution of the parameters. In this notebook we use the parameter draws to compare to the data observed so far (very useful validation check for the model), and to make forecasts. Intuitively, we can think of the range of parameter draws as representing a spread of uncertainty about the underlying parameters. The things we want to forecast, such as number of cases detected in the future or the future seropositivity, depend non-linearly on the parameters. Therefore, the spread of uncertainty in the predictions depends on solving the underlying model into the future (i.e. past the points where we have data) for each parameter drawn from the posterior distribution. In this notebook we cover:
+
+* Convertind the MCMC chain into predictions.
+* Plotting methods in `KenyaSerology` for the inferred parameters.
+
+First, we load a `CovAreaModel` object for Nairobi.
+
+
+```julia
+cd(joinpath(homedir(),"GitHub/KenyaSerology/")) #Sets the working directory to the /KenyaSerology directory
+push!(LOAD_PATH, joinpath(homedir(),"GitHub/KenyaSerology/src")) #Adds the source code directory for KenyaSerology to the LOAD_PATH global variable
+
+using JLD2,Plots,Dates
+using Distributions,TransformVariables,Parameters #These packages define some useful methods
+
+import KenyaSerology
+
+@load("modelfits_pos_neg_googleCt/Nairobi_model.jld2")#This is fitted model for Nairobi we used in the paper
+nairobi_inference_model = model; #For consistency in naming with notebook 5
+
+```
+
+To convert the fitted model into predictions we use the `incidence_across_samples` method from the `KenyaSerology` package. This method reads in a fitted model and a number of days after 20th Feb we want to solve the model for: we use 325 days (1st Jan 2021). `incidence_across_samples` outputs a `NamedTuple` of collected estimates (one for each parameter in drawn in the MCMC chain) for things like mean number of PCR detections per day, seroconversion each day, true number of people who have been infected each day etc. An important point is that because we use two different observation models for swab tests (Negative-Binomial when negative tests are unavailable and BetaBinomial when negative tests are available) that there are two prediction of the mean number of PCR positive swabs observed.
+
+
+```julia
+inc = KenyaSerology.incidence_across_samples(nairobi_inference_model,325);
+```
+
+Having 10,000 draws from the underlying Bayesian distribution of predictions for each day is not necessarily easy to visualise! We also have the helper function `create_credible_intervals`, which converts any element of the `inc` object into a collection of the daily mean, how much the 2.5% percentile is less than the mean, and how much the 97.5% percentile is greater than the mean. This can be plotted to give a visualisation of the 'best' prediction and its 95% central Bayesian prediction intervals.
+
+
+```julia
+#As an example we find the daily predictions for the true prevalence (number of people in I class)
+prevalence = KenyaSerology.create_credible_intervals(inc.true_infectious)
+dates = [Date(2020,2,20) + Day(k) for k = 1:325]
+plot(dates,prevalence.mean_pred,
+    ribbon = (prevalence.lb_pred,prevalence.ub_pred),
+    color = :red,
+    ylabel = "Prevalence",
+    lab ="",
+    lw=2,
+    fillalpha = 0.2)
+```
+
+We used this method of plotting the predictions of the MCMC chain repeatedly. `KenyaSerology` has some plotting methods for combining the MCMC predictions and the underlying data.
+For plotting with both predictions with and without negative PCR swab test data we use two different colors (blue and orange respectively).
+
+```julia
+#Plot the comparison between the fitted predictions and swab tests
+plt_swab = KenyaSerology.weeklyplotfittoPCRdata(nairobi_inference_model)
+plot!(plt_swab,
+  size = (400,350),
+  guidefont = 6,
+  titlefont = 8,
+  tickfont = 6,
+  legendfont = 6)#Resized for plotting in notebook
+```
+We also plot predictions of the undelying true infection rate, seropositivity rate, and remaining proportion of susceptibles.
+
+
+```julia
+#Plot the comparison between the fitted predictions and monthly pooled serology tests
+plt_pop = KenyaSerology.population_plot(nairobi_inference_model,Val(:monthlyserology))
+plot!(plt_pop,
+    xlims = (0.,225),
+    size = (400,350),
+    guidefont = 6,
+  titlefont = 8,
+  tickfont = 6,
+  legendfont = 6)#Resized for plotting in notebook
+plt_pop.series_list[5].plotattributes[:markersize] = 4 #Resize markers for notebook plotting
+display(plt_pop)
+```
+
+
+
+```julia
+#Plot inferred underlying predicted transmission rate with comparison of deaths predicted and observed
+#This needs death data and p_ID
+@load("data/p_ID.jld2")
+@load("data/death_data_by_area_21feb_to_17oct.jld2")
+nairobi_deaths = vec(death_data.deaths[:,death_data.areas.=="NAIROBI"][1:223])#Only looking at up to 30th Sept
+plt_incidence = KenyaSerology.plot_deaths_weekly(nairobi_inference_model,nairobi_deaths,p_ID,55)
+plot!(plt_incidence,
+    size = (400,350),
+      guidefont = 6,
+      titlefont = 8,
+      tickfont = 4,
+      legendfont = 4)#Resized for plotting in notebook
+plt_incidence.series_list[3].plotattributes[:markersize] = 4 #Resize markers for notebook plotting
+plt_incidence.series_list[4].plotattributes[:markersize] = 4 #Resize markers for notebook plotting
+display(plt_incidence)
+
+```

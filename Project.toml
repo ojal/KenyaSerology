@@ -1,6 +1,6 @@
 name = "KenyaSerology"
 uuid = "8af3f325-98b9-4f28-b139-0b1650003e02"
-authors = ["Samuel Brand <S.Brand@warwick.ac.uk>", "John Ojal <John.Ojal@lshtm.ac.uk>"]
+authors = ["Samuel Brand <S.Brand@warwick.ac.uk>","John Ojal <John.Ojal@lshtm.ac.uk>"]
 version = "1.2.0"
 
 [deps]
@@ -9,6 +9,7 @@ BlackBoxOptim = "a134a8b2-14d6-55f6-9291-3336d3ab0209"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 DynamicHMC = "bbc10e6e-7c05-544b-b16e-64fede858acb"
+FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"

@@ -3,7 +3,7 @@
 This repository contains the openly available data and code in order to reproduce the results of *Revealing the extent of the COVID-19 pandemic in Kenya based on serological and PCR-test data*, and/or, use the package with data from another setting.
 
 ## Prerequisites and recommended background knowledge:
-* Access and basic familiarity with the [Julia programming language](https://julialang.org/). The code base in this repository was run using Julia 1.3.1, and has not been tested for other Julia releases as of 03/09/2020.
+* Access and basic familiarity with the [Julia programming language](https://julialang.org/).
 * The underlying dynamical system representing the unobserved infection process is a modification to the basic SEIR model that is described in [this paper](https://journals.sagepub.com/doi/full/10.1177/0962280217747054), albeit we implement a continuous time rather than discrete version of the model.
 * Solutions of the infection process are generated using the performant, and well documented, package [SciML/DifferentialEquations.jl](https://github.com/SciML/DifferentialEquations.jl). Familiarisation with this package is desirable.
 * Hamiltonian MCMC (HMC) is implemented using the [dynamicHMC.jl](https://github.com/tpapp/DynamicHMC.jl) package. The log-likelihood function for parameters is directly defined in KenyaSerology, and log-likelihood gradients (necessary for HMC) are calculated using forward-mode automatic differentiation. The combination of ODE solutions and log-likelihood function gradients in code was inspired by [DiffEqBayes.jl](https://github.com/SciML/DiffEqBayes.jl). A good conceptual introduction to HMC can be found [here](https://arxiv.org/abs/1701.02434).

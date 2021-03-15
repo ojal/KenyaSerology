@@ -1,6 +1,6 @@
 # KenyaSerology
 
-This repository contains the openly available data and code in order to reproduce the results of *Revealing the extent of the COVID-19 pandemic in Kenya based on serological and PCR-test data*, and/or, use the package with data from another setting.
+This repository contains the openly available data and code in order to reproduce the results of *Revealing the extent of the first wave of the COVID-19 pandemic in Kenya based on serological and PCR-test data*, and/or, use the package with data from another setting.
 
 ## Prerequisites and recommended background knowledge:
 * Access and basic familiarity with the [Julia programming language](https://julialang.org/).
@@ -10,10 +10,16 @@ This repository contains the openly available data and code in order to reproduc
 
 ## Data sets in this repository
 
-`/opendatacsvs`folder contains .csv datafiles (see *supplementary information* for the main manuscript to read data file captions). This data is also present on the repository in the form of .jld2 datafiles.
+`/opendatacsvs`folder contains .csv datafiles (see *supplementary information* for the main manuscript to read data file captions). This data is also present on the repository in the form of .jld2 datafiles, which are directly used in the tutorial notebooks (see below).
+
+## Supplementary Information
+
+Please find the supplementary information containing further details on the data analysis, and mathematical/statistical reasoning and assumptions behind the model in `/supplementary_info` as a Word file.
 
 ## Tutorial notebooks
 
 To aid reproducability and reusability of this model we are currently writing a series of notebooks that either elucidate our methodology, or directly reproduce results in the paper. These cover the basic ideas behind the model (how the contact rates are generated, the underlying transmission model etc) and the methods used to draw inferences from the data (the interaction between time-since-infection and detectability by different tests) and make predictions (as well as visualising these predictions).
 
 The notebooks are given as `.jmd` files, and require [Weave.jl](https://github.com/JunoLab/Weave.jl) to create html output files. Usage of julia markdown with Weave is very similar to the popular R markdown `.rmd` with `knitr`.   
+
+It is recommended that before running the code on this repository locally you activate the KenyaSerology environment by navigating your REPL working directory to where you have locally cloned this repository and entering `]` for the package mode and then `activate .`, followed by `instantiate`. This will download and use the relevant versions of the Julia packages.

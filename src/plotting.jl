@@ -398,7 +398,12 @@ function weeklyplotfittoPCRdata(model::KenyaSerology.CoVAreaModel)
     Ms = model.MCMC_results.chain[:,findfirst(keys(model.MCMC_results.chain).== :M_PCR),1]
     αs = model.MCMC_results.chain[:,findfirst(keys(model.MCMC_results.chain).== :α),1]
     total_ns = vec(sum(model.PCR_cases,dims=2))
-    total_ns[model.PCR_cases[:,2] .< 0] .= 1000# round(Int64,mean(total_ns[model.PCR_cases[:,2] .> 0]))
+    first_7days_with_neg_tests = collect(1:7)
+    if !isempty(findall(model.PCR_cases[:,2] .< 0))
+        first_7days_with_neg_tests = findall(model.PCR_cases[:,2] .< 0)[1:7]
+    end
+    guess_for_total_tests_before_reporting = max(round(Int64,sum(model.PCR_cases[first_7days_with_neg_tests,:])/7),0)
+    total_ns[model.PCR_cases[:,2] .< 0] .= guess_for_total_tests_before_reporting# round(Int64,mean(total_ns[model.PCR_cases[:,2] .> 0]))
 
     weekly_preds_NB = KenyaSerology.create_all_weekly_prediction_intervals_NB(pred_mean_PCR,αs,10000)
     weekly_preds_BB = KenyaSerology.create_all_weekly_prediction_intervals_BB(pred_P_PCR,Ms,total_ns,10000)
@@ -407,21 +412,22 @@ function weeklyplotfittoPCRdata(model::KenyaSerology.CoVAreaModel)
     #First week is week 8 of year which starts 17th Feb i.e. -4 on the tick scale
     weekdates_on_scale = collect(0:(length(weekly_preds_NB.mean_pred))-1).*7 .- 4
 
-    plt = plot(weekdates_on_scale[1:firstweek_with_neg_tests] ,weekly_preds_NB.mean_pred[1:firstweek_with_neg_tests],
-                ribbon = (weekly_preds_NB.weekly_lb[1:firstweek_with_neg_tests],weekly_preds_NB.weekly_ub[1:firstweek_with_neg_tests]),
+    plt = plot(weekdates_on_scale[1:(firstweek_with_neg_tests+1)] ,weekly_preds_NB.mean_pred[1:(firstweek_with_neg_tests+1)],
+                ribbon = (weekly_preds_NB.weekly_lb[1:(firstweek_with_neg_tests+1)],weekly_preds_NB.weekly_ub[1:(firstweek_with_neg_tests+1)]),
                 xticks = (xticktimes,xticklabs),
                 lab = "Only +ve swab tests available",
                 legend = :topleft,
                 size = (700,500),dpi = 250,
-                guidefont = 20,
-                tickfont = 14,
-                legendfont = 12,
-                titlefont = 19,
+                guidefontsize = 20,
+                tickfontsize = 14,
+                legendfontsize = 12,
+                titlefontsize = 19,
+                left_margin = 5mm,right_margin = 10mm,
                 title = "$(model.areaname): PCR positive test prediction and data",
                 ylabel = "Weekly positive swab tests ",
                 lw = 2.5)
-    plot!(plt,weekdates_on_scale[firstweek_with_neg_tests:(end-1)] ,weekly_preds_BB.mean_pred[firstweek_with_neg_tests:(end-1)],
-            ribbon = (weekly_preds_BB.weekly_lb[firstweek_with_neg_tests:end],weekly_preds_BB.weekly_ub[firstweek_with_neg_tests:end]),
+    plot!(plt,weekdates_on_scale[(firstweek_with_neg_tests+1):(end-1)] ,weekly_preds_BB.mean_pred[(firstweek_with_neg_tests+1):(end-1)],
+            ribbon = (weekly_preds_BB.weekly_lb[(firstweek_with_neg_tests+1):end],weekly_preds_BB.weekly_ub[(firstweek_with_neg_tests+1):end]),
             lab = "All tests available",
             lw = 2.5)
 
@@ -684,8 +690,8 @@ function plot_incidenceonly(areamodel::CoVAreaModel)
                 # ylims = (0.5,6e4),
                 ylabel = "Daily incidence",
                 title = "$(areamodel.areaname): incidence of infection",
-                titlefont = 18,guidefont = 20,tickfont = 14,
-                legendfont = 12,
+                titlefontsize = 18,guidefontsize = 20,tickfontsize = 14,
+                legendfontsize = 12,
                 size = (700,500),dpi = 250,
                 left_margin = 5mm,
                 right_margin = 5mm)
@@ -721,8 +727,8 @@ function plot_deaths(areamodel::CoVAreaModel,areadeaths,p_ID)
                 ylabel = "Daily deaths",
                 xticks = (xticktimes,xticklabs),
                 title = "$(areamodel.areaname): observed and predicted deaths",
-                titlefont = 18,guidefont = 20,tickfont = 14,
-                legendfont = 12,
+                titlefontsize = 18,guidefontsize = 20,tickfontsize = 14,
+                legendfontsize = 12,
                 size = (700,500),dpi = 250,
                 left_margin = 5mm,
                 right_margin = 5mm)
@@ -786,8 +792,8 @@ function plot_deaths_weekly(areamodel::CoVAreaModel,areadeaths,p_ID,mainylim)
                 ylabel = "Weekly deaths",
                 xticks = (xticktimes,xticklabs),
                 title = "$(areamodel.areaname): observed and predicted deaths",
-                titlefont = 18,guidefont = 20,tickfont = 14,
-                legendfont = 12,
+                titlefontsize = 18,guidefontsize = 20,tickfontsize = 14,
+                legendfontsize = 12,
                 size = (700,500),dpi = 250,
                 left_margin = 5mm,
                 right_margin = 5mm)

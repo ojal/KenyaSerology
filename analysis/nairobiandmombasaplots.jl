@@ -1,17 +1,12 @@
-## Load PATH and relevant packages (most of these aren't required, but I run everything in Main module
-# then put into KenyaSerology module)
-
-push!(LOAD_PATH, joinpath(homedir(),"GitHub/KenyaSerologyPrivate/src"))
-
-using Distributions,Plots,Dates,JLD2,TransformVariables,Optim,FileIO,CSV,DataFrames
+## Activate the Project environment, make sure working directory is the KenyaSerology folder
+using Pkg; Pkg.activate("."); Pkg.precompile()
 using Revise
-import KenyaSerology
-## Choose plotting backend. I currently like pyplot (which uses the matplotlib python backend) because
-#it renders Greek symbols
-pyplot()
-gr()
-plotlyjs()
+##
 
+using Distributions,Plots,Dates,JLD2,TransformVariables,Optim,FileIO,CSV,DataFrames,OrdinaryDiffEq
+using Plots.PlotMeasures
+import KenyaSerology
+gr()
 ## Revised submission data up to 30th September
 
 #With R(t) fitting
@@ -27,21 +22,33 @@ sum(case_data_with_pos_neg.cases[:,case_data_with_pos_neg.areas .== "MOMBASA",1]
 
 sum(case_data_with_pos_neg.cases[:,:,:])
 
-@load("modelfits_pos_neg/Nairobi_model.jld2")
+@load("modelfits_pos_neg_googleCt/Nairobi_model.jld2")
 nairobi_model = deepcopy(model)
-@load("modelfits_pos_neg_opt/Nairobi_model_opt.jld2")
+
+
+##
+
+@load("modelfits_pos_neg_fittedCt/Nairobi_model_opt.jld2")
 nairobi_model_opt = deepcopy(model_opt)
+nairobi_model_opt.prob = KenyaSerology.make_odeproblemforinference(nairobi_model_opt.contactrate_data;
+                                                                startdate = Date(2020,2,21),
+                                                                enddate = Date(2020,10,1))
+
+
+## Test for reconstructing
+
+prob = KenyaSerology.make_odeproblemforinference(nairobi_model.contactrate_data;startdate = Date(2020,2,21),enddate = Date(2020,10,1))
+sol = solve(prob,Tsit5())
+
+plot(sol,vars = [:I])
+##
+
 # @load("modelfits_pos_neg_opt_vs2/Nairobi_model_opt.jld2")
 # nairobi_model_opt2 = deepcopy(model_opt)
 
-
-
-
-
-@load("modelfits_pos_neg/Mombasa_model.jld2")
+@load("modelfits_pos_neg_googleCt/Mombasa_model.jld2")
 mombasa_model = deepcopy(model)
-
-@load("modelfits_pos_neg_opt/Mombasa_model_opt.jld2")
+@load("modelfits_pos_neg_fittedCt/Mombasa_model_opt.jld2")
 mombasa_model_opt = deepcopy(model_opt)
 # @load("modelfits_pos_neg_opt_vs2/Mombasa_model_opt.jld2")
 # mombasa_model_opt2 = deepcopy(model_opt)
@@ -84,10 +91,11 @@ plot!(plt_pop_nai,xlims = (0.,oct_first),
 plt_pop_nai_opt = KenyaSerology.population_plot(nairobi_model_opt,Val(:monthlyserology))
 plot!(plt_pop_nai_opt,xlims = (0.,oct_first),
         ylims = (-5,120),
-        guidefont = 20,
-        tickfont = 14,
-        legendfont = 12,
-        titlefont = 18,
+        guidefontsize = 20,
+        tickfontsize = 14,
+        legendfontsize = 12,
+        titlefontsize = 18,
+        left_margin = 5mm,right_margin = 10mm,
         yticks = [0,20,40,60,80,100])
 
 plt_pop_mom = KenyaSerology.population_plot(mombasa_model,Val(:monthlyserology))
@@ -135,7 +143,7 @@ savefig(plt_PCR_mom_opt,"weekly_PCR_fit_mombasa_opt.pdf")
 
 ## Deaths
 
-plt_deaths_nai = KenyaSerology.plot_deaths(nairobi_model,nai_deaths,p_ID)
+plt_deaths_nai = KenyaSerology.plot_deaths(nairobi_model_opt,nai_deaths,p_ID)
 
 plot!(plt_deaths_nai,title = "Nairobi: Observed and predicted deaths")
 savefig("plotsforpaper/nairobi_deaths_vs2.pdf")

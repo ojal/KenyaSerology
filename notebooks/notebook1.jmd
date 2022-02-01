@@ -10,9 +10,9 @@ The first step is to load the relevant Julia packages and the data from the `/da
 ```julia
 using CSV,DataFrames,Plots,Dates,Statistics,JLD2,Polynomials
 using Plots.PlotMeasures,GaussianProcesses,Distributions,LinearAlgebra
-pyplot() #Choosing Pyplot as the plotting backend
+gr() #Choosing GR as the plotting backend
 
-mobilitydata_kenya = DataFrame!(CSV.File("../data/2020_KE_Region_Mobility_Report.csv"))
+mobilitydata_kenya = DataFrame(CSV.File("data/2020_KE_Region_Mobility_Report.csv"))
 
 Kenyawide = mobilitydata_kenya[(ismissing.(mobilitydata_kenya.sub_region_1)).&(ismissing.(mobilitydata_kenya.metro_area)),:]
 nairobidata = mobilitydata_kenya[(mobilitydata_kenya.sub_region_1 .=="Nairobi County").&(.~ismissing.(mobilitydata_kenya.sub_region_1)),:]

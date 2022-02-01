@@ -77,3 +77,5 @@ plot!(plt_pop, xlims = (0.0, oct_first),
 uprname = uppercase(name)
 deaths = death_data.deaths[:, death_data.areas.==uprname][1:(end-14)]
 plt_deaths = KenyaSerology.plot_deaths(model, deaths, p_ID)
+
+plot(mode)

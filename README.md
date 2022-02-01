@@ -23,3 +23,7 @@ To aid reproducability and reusability of this model we are currently writing a 
 The notebooks are given as `.jmd` files, and require [Weave.jl](https://github.com/JunoLab/Weave.jl) to create html output files. Usage of julia markdown with Weave is very similar to the popular R markdown `.rmd` with `knitr`.   
 
 It is recommended that before running the code on this repository locally you activate the KenyaSerology environment by navigating your REPL working directory to where you have locally cloned this repository and entering `]` for the package mode and then `activate .`, followed by `instantiate`. This will download and use the relevant versions of the Julia packages.
+
+## County-specific plots
+
+The overall model for Kenya consisted of 47 county specific models, aggregated to make national totals. The prediction intervals for PCR positive swab tests, population exposure, deaths and time-varying reproductive ratio (full R(t) rather than effective R(t)) can be found in the `countyplot` folder.

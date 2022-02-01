@@ -164,4 +164,28 @@ ann2 = (39, 0.76, Plots.text("2", :left))
 ann3 = (79, 0.76, Plots.text("3", :left))
 plot!(plt_Rt, annotations = [ann1, ann2, ann3])
 plot!(plt_Rt, ylabel = "R(t)")
-savefig(plt_Rt, "Rt_plot.pdf")
+# savefig(plt_Rt, "Rt_plot.pdf")
+
+
+## Plot Rt for each county
+
+
+for rt_data in gathered_Rt_data
+        plt_Rt = plot(rt_data.mean_Rt,
+                ribbon = (rt_data.Rt_lpred, rt_data.Rt_upred),
+                fillalpha = 0.2,
+                lw = 2.5,
+                color = :red,
+                ylims = (0.5, 3.55),
+                xticks = (xticktimes, xticklabs),
+                ylabel = "R(t)",
+                lab = "",
+                size = (700, 500), dpi = 250,
+                guidefontsize = 20,
+                tickfontsize = 12,
+                legendfontsize = 12,
+                titlefontsize = 18,
+                title = "Inferred R(t): $(rt_data.name) ")
+        savefig(plt_Rt, "countyplot/Rt/Rt_$(rt_data.name).png")
+end
+
